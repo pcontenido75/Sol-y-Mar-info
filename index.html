@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador Anti-Spam Sol y Mar</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f0fdf4; margin: 0; padding: 16px; display: flex; justify-content: center; }
+    .card { background: #ffffff; border-radius: 16px; padding: 20px; max-width: 480px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    h2 { font-size: 1.25rem; color: #065f46; margin-top: 0; text-align: center; }
+    .preview { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; min-height: 200px; font-size: 0.95rem; line-height: 1.5; color: #334155; white-space: pre-wrap; margin-bottom: 16px; }
+    .btn-group { display: flex; gap: 10px; }
+    button { flex: 1; padding: 13px; font-size: 0.95rem; font-weight: 600; border-radius: 10px; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-generate { background-color: #059669; color: white; }
+    .btn-generate:active { background-color: #047857; transform: scale(0.98); }
+    .btn-copy { background-color: #0284c7; color: white; }
+    .btn-copy:active { background-color: #0369a1; transform: scale(0.98); }
+    .alert { text-align: center; font-size: 0.82rem; color: #64748b; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>Sol y Mar - Respuestas</h2>
+  <div class="preview" id="output">Presiona "Generar versión" para crear un mensaje nuevo.</div>
+  
+  <div class="btn-group">
+    <button class="btn-generate" onclick="crearVariacion()">Generar versión</button>
+    <button class="btn-copy" onclick="copiarTexto()">Copiar texto</button>
+  </div>
+  <div class="alert" id="status">Variaciones automáticas sin palabras bloqueadas ni símbolo $.</div>
+</div>
+
+<script>
+  const saludos = [
+    "¡Hola! Gracias por contactar a Residencias Sol y Mar 🌊",
+    "¡Buenas! Te comparto la información de Residencias Sol y Mar:",
+    "¡Saludos! Con gusto te paso los detalles de los apartamentos en Sol y Mar ✨",
+    "¡Hola! Qué tal, gracias por tu interés en Residencias Sol y Mar:"
+  ];
+
+  const ubicaciones = [
+    "Ubicación privilegiada: a solo 2 cuadras de los embarcaderos.",
+    "Estamos a tan solo 2 cuadras de la zona de embarcaderos.",
+    "Punto estratégico a apenas dos calles de donde salen las lanchas.",
+    "Ubicados a 2 cuadras de los muelles principales de Chichiriviche."
+  ];
+
+  const servicios = [
+    "Apartamentos totalmente equipados con cocina, nevera y utensilios básicos. Cuentan con piscina, WiFi, TV y planta eléctrica.",
+    "Equipamiento completo: cocina, nevera y utensilios básicos, además de piscina, WiFi, televisión y planta eléctrica continua.",
+    "Comodidades completas con cocina equipada, nevera y enseres, más área de piscina, internet WiFi, TV y respaldo con planta eléctrica.",
+    "Listos para tu estadía con cocina, nevera, utensilios, piscina, WiFi, TV y servicio de planta eléctrica garantizado."
+  ];
+
+  const formatosPrecios = [
+    "Tarifas por noche según ocupación:\n• 2 personas: 45\n• 3 personas: 60\n• 4 personas: 80\n• 5 personas: 100\n• 6 personas: 120",
+    "Estadía por noche según grupo:\n- 2 personas: 45\n- 3 personas: 60\n- 4 personas: 80\n- 5 personas: 100\n- 6 personas: 120",
+    "Valores por noche:\n2 personas en 45 | 3 personas en 60 | 4 personas en 80 | 5 personas en 100 | 6 personas en 120",
+    "Precios por noche según cantidad de personas:\n• 2 huéspedes: 45\n• 3 huéspedes: 60\n• 4 huéspedes: 80\n• 5 huéspedes: 100\n• 6 huéspedes: 120"
+  ];
+
+  const pagos = [
+    "Aceptamos diversas modalidades de pago para tu facilidad (transferencia, opciones digitales y efectivo).",
+    "Disponemos de métodos cómodos de pago: efectivo, transferencias bancarias y alternativas digitales.",
+    "Manejamos varias formas de abono: medios digitales, transferencias y efectivo.",
+    "Modalidades disponibles para abonar: opciones digitales, transferencia y efectivo."
+  ];
+
+  const cierres = [
+    "Para reservas y disponibilidad consulta directamente al enlace de nuestro perfil.",
+    "Cualquier consulta de fechas o para asegurar tu estadía, entra al link de la biografía.",
+    "Para verificar fechas disponibles y coordinar, escríbenos al link del perfil.",
+    "Si deseas coordinar tu llegada, déjanos un mensaje por el enlace de la bio."
+  ];
+
+  function randomItem(lista) {
+    return lista[Math.floor(Math.random() * lista.length)];
+  }
+
+  function crearVariacion() {
+    const estilo = Math.floor(Math.random() * 2);
+    let texto = "";
+
+    if (estilo === 0) {
+      texto = `${randomItem(saludos)}\n\n` +
+              `📍 ${randomItem(ubicaciones)}\n\n` +
+              `🏡 ${randomItem(servicios)}\n\n` +
+              `${randomItem(formatosPrecios)}\n\n` +
+              `💳 ${randomItem(pagos)}\n\n` +
+              `📲 ${randomItem(cierres)}`;
+    } else {
+      texto = `${randomItem(saludos)}\n\n` +
+              `${randomItem(ubicaciones)} ${randomItem(servicios)}\n\n` +
+              `${randomItem(formatosPrecios)}\n\n` +
+              `${randomItem(pagos)} ${randomItem(cierres)}`;
+    }
+
+    document.getElementById("output").innerText = texto;
+    document.getElementById("status").innerText = "¡Nueva versión lista para copiar!";
+  }
+
+  function copiarTexto() {
+    const contenido = document.getElementById("output").innerText;
+    if (contenido.includes("Presiona")) return;
+    
+    navigator.clipboard.writeText(contenido).then(() => {
+      document.getElementById("status").innerText = "✅ Mensaje copiado al portapapeles.";
+      setTimeout(() => {
+        document.getElementById("status").innerText = "Listo para enviar.";
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
