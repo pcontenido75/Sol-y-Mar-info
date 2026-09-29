@@ -1,0 +1,23 @@
+{
+  "name": "Sol y Mar Villa - Información",
+  "short_name": "Sol y Mar",
+  "start_url": "/Sol-y-Mar-info/",
+  "scope": "/Sol-y-Mar-info/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/192/2664/2664589.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2664/2664589.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
