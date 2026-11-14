@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sol y Mar - Respuestas Inteligentes</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="logo.png">
   <meta name="theme-color" content="#0f766e">
   <script>
@@ -9,13 +12,9 @@
       navigator.serviceWorker.register('sw.js');
     }
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sol y Mar - Respuestas Inteligentes</title>
   <style>
     :root {
       --primary: #0f766e;
-      --primary-hover: #115e59;
       --secondary: #0284c7;
       --bg: #f0fdf4;
       --card: #ffffff;
@@ -45,12 +44,12 @@
       color: var(--primary);
       font-size: 1.35rem;
       text-align: center;
-      margin: 0 0 16px 0;
+      margin: 0 0 14px 0;
     }
     .tabs {
       display: flex;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       background: #f1f5f9;
       padding: 4px;
       border-radius: 12px;
@@ -87,7 +86,7 @@
       border: 1.5px solid #e2e8f0;
       border-radius: 14px;
       padding: 16px;
-      min-height: 170px;
+      min-height: 175px;
       font-size: 0.95rem;
       line-height: 1.55;
       white-space: pre-wrap;
@@ -106,14 +105,14 @@
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.1s, opacity 0.2s;
+      transition: transform 0.1s;
     }
     button.action-btn:active { transform: scale(0.98); }
     .btn-gen { background: var(--primary); color: white; }
     .btn-copy { background: var(--secondary); color: white; }
     .status {
       text-align: center;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: var(--muted);
       margin-top: 12px;
       min-height: 18px;
@@ -123,14 +122,14 @@
 <body>
 
 <div class="container">
-  <h1>Sol y Mar - Anti-Filtro</h1>
+  <h1>Sol y Mar • Anti-Spam Pro</h1>
 
   <div class="tabs">
     <button class="tab active" id="tab1" onclick="cambiarModo(1)">1. Primer mensaje</button>
     <button class="tab" id="tab2" onclick="cambiarModo(2)">2. Dar precios y info</button>
   </div>
 
-  <div id="badgeInfo" class="badge">Ideal para abrir chat sin activar spam</div>
+  <div id="badgeInfo" class="badge">Paso 1: Abre el chat sin activar filtros</div>
 
   <div class="output-box" id="textoGenerado"></div>
 
@@ -139,50 +138,76 @@
     <button class="action-btn btn-copy" onclick="copiar()">Copiar texto</button>
   </div>
 
-  <div class="status" id="statusMsg">Listo para usar</div>
+  <div class="status" id="statusMsg">Historial activo: 0 mensajes únicos</div>
 </div>
 
 <script>
   let modoActual = 1;
-  let ultimoIndice = -1;
+  let historial = JSON.parse(localStorage.getItem('solymar_historial_v3') || '[]');
 
-  // PASO 1: Mensajes cortos, humanos, sin números ni menciones a links/pagos
-  const mensajesPaso1 = [
-    "¡Hola! Qué gusto saludarte. Sí tenemos disponibilidad en Sol y Mar. ¿Para qué fechas estás planeando venir y cuántas personas serían?",
-    "¡Buenas! Gracias por escribirnos. Claro que sí, contamos con apartamentos disponibles cerca de los embarcaderos. ¿Qué días tienes pensado viajar?",
-    "Hola, ¿cómo estás? Con mucho gusto te ayudo con tu estadía en Sol y Mar. Cuéntame para qué fecha buscas y cuántos huéspedes van.",
-    "¡Saludos! Sí tenemos opciones disponibles en nuestros apartamentos. ¿Para cuántas personas necesitas y en qué fecha vendrían?",
-    "Hola, gracias por contactarnos. Estamos a dos cuadras del embarcadero con todo listo para recibirlos. ¿Qué fecha te interesa consultar?",
-    "¡Hola! Con gusto te paso la información de Sol y Mar. Antes, dime para cuántas personas sería el hospedaje y qué días tienen en mente."
+  // --- BLOQUES PASO 1 (+300 combinaciones cortas) ---
+  const p1Saludos = [
+    "¡Hola!", "¡Buenas!", "Hola, ¿cómo estás?", "¡Saludos!", "¡Hola! Qué gusto saludarte.",
+    "Hola, gracias por escribirnos.", "¡Buenas! Gracias por contactarnos.", "Hola, ¿qué tal?"
+  ];
+  const p1Confirmacion = [
+    "Sí tenemos disponibilidad en Sol y Mar.",
+    "Claro que sí, contamos con apartamentos disponibles cerca de los embarcaderos.",
+    "Con mucho gusto te ayudo con tu estadía en nuestros apartamentos.",
+    "Sí tenemos opciones disponibles para recibirlos.",
+    "Estamos a dos cuadras del embarcadero con todo listo para su estadía.",
+    "Con gusto te paso la información de Sol y Mar."
+  ];
+  const p1Preguntas = [
+    "¿Para qué fechas estás planeando venir y cuántas personas serían?",
+    "¿Qué días tienes pensado viajar y cuántos huéspedes van?",
+    "Cuéntame para qué fecha buscas y cuántas personas serían.",
+    "¿Para cuántas personas necesitas y en qué fecha vendrían?",
+    "¿Qué fecha te interesa consultar y cuántos van en el grupo?",
+    "Dime para cuántas personas sería el hospedaje y qué días tienen en mente."
   ];
 
-  // PASO 2: Bloques dinámicos en párrafo natural (sin viñetas, sin palabras prohibidas como "link", "bio", "transferencia")
-  const saludosP2 = [
+  // --- BLOQUES PASO 2 (+4,000 combinaciones estructurales) ---
+  const p2Aperturas = [
     "¡Perfecto! Te cuento cómo trabajamos en Sol y Mar.",
     "Con mucho gusto te detallo lo que ofrecemos en nuestros apartamentos.",
-    "Aquí tienes los detalles de nuestra posada Sol y Mar.",
-    "Te comparto la información completa para tu estadía."
+    "Aquí tienes los detalles completos de Sol y Mar.",
+    "Te comparto la información para tu estadía con nosotros.",
+    "Excelente, te explico todo lo que incluye el hospedaje.",
+    "Con gusto te paso los detalles de nuestra posada."
   ];
 
-  const ubicacionYComodidadesP2 = [
-    "Estamos ubicados a solo dos cuadras de los embarcaderos. Los apartamentos están totalmente equipados con cocina, nevera, utensilios, piscina, WiFi, TV y contamos con planta eléctrica.",
-    "Nos encontramos muy cerca de la zona de embarcaderos, a apenas dos cuadras. Cada espacio incluye cocina equipada, nevera, piscina, internet WiFi, televisión y respaldo de planta eléctrica.",
-    "Nuestra ubicación es súper cómoda, a dos cuadras de los embarcaderos. Tienes acceso a piscina, WiFi, TV, planta eléctrica garantizada y apartamento con cocina, nevera y utensilios."
+  const p2Ubicacion = [
+    "Estamos ubicados a solo dos cuadras de los embarcaderos.",
+    "Nos encontramos muy cerca de la zona de embarcaderos, a apenas dos cuadras.",
+    "Nuestra ubicación es súper cómoda, a dos cuadras de los embarcaderos.",
+    "Quedamos a tan solo dos cuadras del embarcadero."
   ];
 
-  const tarifasP2 = [
+  const p2Comodidades = [
+    "Los apartamentos están totalmente equipados con cocina, nevera, utensilios, piscina, WiFi, TV y contamos con planta eléctrica.",
+    "Cada espacio incluye cocina equipada, nevera, piscina, internet WiFi, televisión y respaldo de planta eléctrica.",
+    "Tienes acceso a piscina, WiFi, TV, planta eléctrica garantizada y apartamento con cocina, nevera y utensilios.",
+    "Contamos con piscina, servicio de planta eléctrica, WiFi, TV y cocina equipada con nevera y utensilios."
+  ];
+
+  const p2Tarifas = [
     "La tarifa por noche varía según el grupo: para 2 personas queda en 45, para 3 en 60, para 4 en 80, para 5 en 100 y para 6 personas en 120.",
     "El valor por noche depende de la cantidad de huéspedes: 45 para pareja, 60 si son tres, 80 para cuatro personas, 100 para cinco y 120 para grupos de seis.",
-    "Manejamos las siguientes tarifas por noche según ocupación: dos personas 45, tres personas 60, cuatro personas 80, cinco personas 100 y seis personas 120."
+    "Manejamos las siguientes tarifas por noche según ocupación: dos personas 45, tres personas 60, cuatro personas 80, cinco personas 100 y seis personas 120.",
+    "Según la cantidad de personas el costo por noche es: 2 huéspedes en 45, 3 huéspedes en 60, 4 huéspedes en 80, 5 huéspedes en 100 y 6 huéspedes en 120.",
+    "Nuestros precios por noche son: 45 (2 personas), 60 (3 personas), 80 (4 personas), 100 (5 personas) y 120 (6 personas)."
   ];
 
-  const cierresP2 = [
+  const p2Cierres = [
     "Si te cuadra alguna de estas opciones, dime qué fecha buscas para revisarte disponibilidad.",
     "Avísame para qué día te gustaría reservar y coordinamos los detalles por aquí mismo.",
-    "Cualquier duda me comentas por acá, o si prefieres atención directa puedes escribirnos al contacto de nuestro perfil."
+    "Dime qué fecha tienes en mente y te confirmo si tenemos el apartamento libre.",
+    "Cualquier duda me comentas por acá, o si prefieres atención directa puedes escribirnos al contacto de nuestro perfil.",
+    "Quedo atento a la fecha que buscas para verificar disponibilidad de inmediato."
   ];
 
-  function aleatorio(arr) {
+  function pick(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
@@ -204,40 +229,57 @@
     generar();
   }
 
-  function generar() {
-    const box = document.getElementById('textoGenerado');
-    const status = document.getElementById('statusMsg');
-
+  function construirTexto() {
     if (modoActual === 1) {
-      let idx;
-      do {
-        idx = Math.floor(Math.random() * mensajesPaso1.length);
-      } while (idx === ultimoIndice && mensajesPaso1.length > 1);
-      ultimoIndice = idx;
-      box.textContent = mensajesPaso1[idx];
-    } else {
-      // Construye estructura variable (a veces 2 párrafos, a veces 3)
-      const p1 = `${aleatorio(saludosP2)} ${aleatorio(ubicacionYComodidadesP2)}`;
-      const p2 = aleatorio(tarifasP2);
-      const p3 = aleatorio(cierresP2);
-
-      if (Math.random() > 0.5) {
-        box.textContent = `${p1}\n\n${p2} ${p3}`;
+      // Alterna si incluye confirmación intermedia o va directo a la pregunta
+      if (Math.random() > 0.25) {
+        return `${pick(p1Saludos)} ${pick(p1Confirmacion)} ${pick(p1Preguntas)}`;
       } else {
-        box.textContent = `${p1}\n\n${p2}\n\n${p3}`;
+        return `${pick(p1Saludos)} ${pick(p1Preguntas)}`;
+      }
+    } else {
+      const ap = pick(p2Aperturas);
+      const ub = pick(p2Ubicacion);
+      const com = pick(p2Comodidades);
+      const tar = pick(p2Tarifas);
+      const cie = pick(p2Cierres);
+
+      // Alterna 3 estructuras de párrafo diferentes para romper la huella visual
+      const molde = Math.random();
+      if (molde < 0.35) {
+        return `${ap} ${ub} ${com}\n\n${tar}\n\n${cie}`;
+      } else if (molde < 0.70) {
+        return `${ap} ${com} ${ub}\n\n${tar} ${cie}`;
+      } else {
+        return `${ub} ${com}\n\n${tar}\n\n${cie}`;
       }
     }
-    status.textContent = "Nueva versión generada";
+  }
+
+  function generar() {
+    let candidata = "";
+    let intentos = 0;
+
+    do {
+      candidata = construirTexto();
+      intentos++;
+    } while (historial.includes(candidata) && intentos < 50);
+
+    document.getElementById('textoGenerado').textContent = candidata;
   }
 
   function copiar() {
     const texto = document.getElementById('textoGenerado').textContent;
+    historial.push(texto);
+    if (historial.length > 400) historial.shift();
+    localStorage.setItem('solymar_historial_v3', JSON.stringify(historial));
+
     navigator.clipboard.writeText(texto).then(() => {
-      document.getElementById('statusMsg').textContent = "¡Copiado! Pégalo en TikTok";
+      document.getElementById('statusMsg').textContent = `¡Copiado! (${historial.length} únicos en memoria)`;
+      setTimeout(() => generar(), 400);
     });
   }
 
-  // Inicializar
   generar();
 </script>
 
