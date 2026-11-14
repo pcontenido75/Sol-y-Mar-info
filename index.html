@@ -1,131 +1,237 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0284c7">
-  <link rel="icon" type="image/png" href="logo.png">
-<link rel="apple-touch-icon" href="logo.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generador Anti-Spam Sol y Mar</title>
+  <title>Sol y Mar - Respuestas Inteligentes</title>
   <style>
+    :root {
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+      --secondary: #0284c7;
+      --bg: #f0fdf4;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f0fdf4; margin: 0; padding: 16px; display: flex; justify-content: center; }
-    .card { background: #ffffff; border-radius: 16px; padding: 20px; max-width: 480px; width: 100%; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    h2 { font-size: 1.25rem; color: #065f46; margin-top: 0; text-align: center; }
-    .preview { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; min-height: 200px; font-size: 0.95rem; line-height: 1.5; color: #334155; white-space: pre-wrap; margin-bottom: 16px; }
-    .btn-group { display: flex; gap: 10px; }
-    button { flex: 1; padding: 13px; font-size: 0.95rem; font-weight: 600; border-radius: 10px; border: none; cursor: pointer; transition: 0.2s; }
-    .btn-generate { background-color: #059669; color: white; }
-    .btn-generate:active { background-color: #047857; transform: scale(0.98); }
-    .btn-copy { background-color: #0284c7; color: white; }
-    .btn-copy:active { background-color: #0369a1; transform: scale(0.98); }
-    .alert { text-align: center; font-size: 0.82rem; color: #64748b; margin-top: 10px; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: var(--card);
+      width: 100%;
+      max-width: 440px;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    }
+    h1 {
+      color: var(--primary);
+      font-size: 1.35rem;
+      text-align: center;
+      margin: 0 0 16px 0;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px 8px;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: #ccfbf1;
+      color: #0f766e;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .output-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 170px;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      margin-bottom: 16px;
+      color: #334155;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    button.action-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    button.action-btn:active { transform: scale(0.98); }
+    .btn-gen { background: var(--primary); color: white; }
+    .btn-copy { background: var(--secondary); color: white; }
+    .status {
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-top: 12px;
+      min-height: 18px;
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>Sol y Mar - Respuestas</h2>
-  <div class="preview" id="output">Presiona "Generar versión" para crear un mensaje nuevo.</div>
-  
-  <div class="btn-group">
-    <button class="btn-generate" onclick="crearVariacion()">Generar versión</button>
-    <button class="btn-copy" onclick="copiarTexto()">Copiar texto</button>
+<div class="container">
+  <h1>Sol y Mar - Anti-Filtro</h1>
+
+  <div class="tabs">
+    <button class="tab active" id="tab1" onclick="cambiarModo(1)">1. Primer mensaje</button>
+    <button class="tab" id="tab2" onclick="cambiarModo(2)">2. Dar precios y info</button>
   </div>
-  <div class="alert" id="status">Variaciones automáticas sin palabras bloqueadas ni símbolo $.</div>
+
+  <div id="badgeInfo" class="badge">Ideal para abrir chat sin activar spam</div>
+
+  <div class="output-box" id="textoGenerado"></div>
+
+  <div class="actions">
+    <button class="action-btn btn-gen" onclick="generar()">Otra versión</button>
+    <button class="action-btn btn-copy" onclick="copiar()">Copiar texto</button>
+  </div>
+
+  <div class="status" id="statusMsg">Listo para usar</div>
 </div>
 
 <script>
-  const saludos = [
-    "¡Hola! Gracias por contactar a Residencias Sol y Mar 🌊",
-    "¡Buenas! Te comparto la información de Residencias Sol y Mar:",
-    "¡Saludos! Con gusto te paso los detalles de los apartamentos en Sol y Mar ✨",
-    "¡Hola! Qué tal, gracias por tu interés en Residencias Sol y Mar:"
+  let modoActual = 1;
+  let ultimoIndice = -1;
+
+  // PASO 1: Mensajes cortos, humanos, sin números ni menciones a links/pagos
+  const mensajesPaso1 = [
+    "¡Hola! Qué gusto saludarte. Sí tenemos disponibilidad en Sol y Mar. ¿Para qué fechas estás planeando venir y cuántas personas serían?",
+    "¡Buenas! Gracias por escribirnos. Claro que sí, contamos con apartamentos disponibles cerca de los embarcaderos. ¿Qué días tienes pensado viajar?",
+    "Hola, ¿cómo estás? Con mucho gusto te ayudo con tu estadía en Sol y Mar. Cuéntame para qué fecha buscas y cuántos huéspedes van.",
+    "¡Saludos! Sí tenemos opciones disponibles en nuestros apartamentos. ¿Para cuántas personas necesitas y en qué fecha vendrían?",
+    "Hola, gracias por contactarnos. Estamos a dos cuadras del embarcadero con todo listo para recibirlos. ¿Qué fecha te interesa consultar?",
+    "¡Hola! Con gusto te paso la información de Sol y Mar. Antes, dime para cuántas personas sería el hospedaje y qué días tienen en mente."
   ];
 
-  const ubicaciones = [
-    "Ubicación privilegiada: a solo 2 cuadras de los embarcaderos.",
-    "Estamos a tan solo 2 cuadras de la zona de embarcaderos.",
-    "Punto estratégico a apenas dos calles de donde salen las lanchas.",
-    "Ubicados a 2 cuadras de los muelles principales de Chichiriviche."
+  // PASO 2: Bloques dinámicos en párrafo natural (sin viñetas, sin palabras prohibidas como "link", "bio", "transferencia")
+  const saludosP2 = [
+    "¡Perfecto! Te cuento cómo trabajamos en Sol y Mar.",
+    "Con mucho gusto te detallo lo que ofrecemos en nuestros apartamentos.",
+    "Aquí tienes los detalles de nuestra posada Sol y Mar.",
+    "Te comparto la información completa para tu estadía."
   ];
 
-  const servicios = [
-    "Apartamentos totalmente equipados con cocina, nevera y utensilios básicos. Cuentan con piscina, WiFi, TV y planta eléctrica.",
-    "Equipamiento completo: cocina, nevera y utensilios básicos, además de piscina, WiFi, televisión y planta eléctrica continua.",
-    "Comodidades completas con cocina equipada, nevera y enseres, más área de piscina, internet WiFi, TV y respaldo con planta eléctrica.",
-    "Listos para tu estadía con cocina, nevera, utensilios, piscina, WiFi, TV y servicio de planta eléctrica garantizado."
+  const ubicacionYComodidadesP2 = [
+    "Estamos ubicados a solo dos cuadras de los embarcaderos. Los apartamentos están totalmente equipados con cocina, nevera, utensilios, piscina, WiFi, TV y contamos con planta eléctrica.",
+    "Nos encontramos muy cerca de la zona de embarcaderos, a apenas dos cuadras. Cada espacio incluye cocina equipada, nevera, piscina, internet WiFi, televisión y respaldo de planta eléctrica.",
+    "Nuestra ubicación es súper cómoda, a dos cuadras de los embarcaderos. Tienes acceso a piscina, WiFi, TV, planta eléctrica garantizada y apartamento con cocina, nevera y utensilios."
   ];
 
-  const formatosPrecios = [
-    "Tarifas por noche según ocupación:\n• 2 personas: 45\n• 3 personas: 60\n• 4 personas: 80\n• 5 personas: 100\n• 6 personas: 120",
-    "Estadía por noche según grupo:\n- 2 personas: 45\n- 3 personas: 60\n- 4 personas: 80\n- 5 personas: 100\n- 6 personas: 120",
-    "Valores por noche:\n2 personas en 45 | 3 personas en 60 | 4 personas en 80 | 5 personas en 100 | 6 personas en 120",
-    "Precios por noche según cantidad de personas:\n• 2 huéspedes: 45\n• 3 huéspedes: 60\n• 4 huéspedes: 80\n• 5 huéspedes: 100\n• 6 huéspedes: 120"
+  const tarifasP2 = [
+    "La tarifa por noche varía según el grupo: para 2 personas queda en 45, para 3 en 60, para 4 en 80, para 5 en 100 y para 6 personas en 120.",
+    "El valor por noche depende de la cantidad de huéspedes: 45 para pareja, 60 si son tres, 80 para cuatro personas, 100 para cinco y 120 para grupos de seis.",
+    "Manejamos las siguientes tarifas por noche según ocupación: dos personas 45, tres personas 60, cuatro personas 80, cinco personas 100 y seis personas 120."
   ];
 
-  const pagos = [
-    "Aceptamos diversas modalidades de pago para tu facilidad (transferencia, opciones digitales y efectivo).",
-    "Disponemos de métodos cómodos de pago: efectivo, transferencias bancarias y alternativas digitales.",
-    "Manejamos varias formas de abono: medios digitales, transferencias y efectivo.",
-    "Modalidades disponibles para abonar: opciones digitales, transferencia y efectivo."
+  const cierresP2 = [
+    "Si te cuadra alguna de estas opciones, dime qué fecha buscas para revisarte disponibilidad.",
+    "Avísame para qué día te gustaría reservar y coordinamos los detalles por aquí mismo.",
+    "Cualquier duda me comentas por acá, o si prefieres atención directa puedes escribirnos al contacto de nuestro perfil."
   ];
 
-  const cierres = [
-    "Para reservas y disponibilidad consulta directamente al enlace de nuestro perfil.",
-    "Cualquier consulta de fechas o para asegurar tu estadía, entra al link de la biografía.",
-    "Para verificar fechas disponibles y coordinar, escríbenos al link del perfil.",
-    "Si deseas coordinar tu llegada, déjanos un mensaje por el enlace de la bio."
-  ];
-
-  function randomItem(lista) {
-    return lista[Math.floor(Math.random() * lista.length)];
+  function aleatorio(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
-  function crearVariacion() {
-    const estilo = Math.floor(Math.random() * 2);
-    let texto = "";
-
-    if (estilo === 0) {
-      texto = `${randomItem(saludos)}\n\n` +
-              `📍 ${randomItem(ubicaciones)}\n\n` +
-              `🏡 ${randomItem(servicios)}\n\n` +
-              `${randomItem(formatosPrecios)}\n\n` +
-              `💳 ${randomItem(pagos)}\n\n` +
-              `📲 ${randomItem(cierres)}`;
-    } else {
-      texto = `${randomItem(saludos)}\n\n` +
-              `${randomItem(ubicaciones)} ${randomItem(servicios)}\n\n` +
-              `${randomItem(formatosPrecios)}\n\n` +
-              `${randomItem(pagos)} ${randomItem(cierres)}`;
-    }
-
-    document.getElementById("output").innerText = texto;
-    document.getElementById("status").innerText = "¡Nueva versión lista para copiar!";
-  }
-
-  function copiarTexto() {
-    const contenido = document.getElementById("output").innerText;
-    if (contenido.includes("Presiona")) return;
+  function cambiarModo(modo) {
+    modoActual = modo;
+    document.getElementById('tab1').classList.toggle('active', modo === 1);
+    document.getElementById('tab2').classList.toggle('active', modo === 2);
     
-    navigator.clipboard.writeText(contenido).then(() => {
-      document.getElementById("status").innerText = "✅ Mensaje copiado al portapapeles.";
-      setTimeout(() => {
-        document.getElementById("status").innerText = "Listo para enviar.";
-      }, 2000);
+    const badge = document.getElementById('badgeInfo');
+    if (modo === 1) {
+      badge.textContent = "Paso 1: Abre el chat sin activar filtros";
+      badge.style.background = "#ccfbf1";
+      badge.style.color = "#0f766e";
+    } else {
+      badge.textContent = "Paso 2: Úsalo solo cuando el cliente responda";
+      badge.style.background = "#e0f2fe";
+      badge.style.color = "#0369a1";
+    }
+    generar();
+  }
+
+  function generar() {
+    const box = document.getElementById('textoGenerado');
+    const status = document.getElementById('statusMsg');
+
+    if (modoActual === 1) {
+      let idx;
+      do {
+        idx = Math.floor(Math.random() * mensajesPaso1.length);
+      } while (idx === ultimoIndice && mensajesPaso1.length > 1);
+      ultimoIndice = idx;
+      box.textContent = mensajesPaso1[idx];
+    } else {
+      // Construye estructura variable (a veces 2 párrafos, a veces 3)
+      const p1 = `${aleatorio(saludosP2)} ${aleatorio(ubicacionYComodidadesP2)}`;
+      const p2 = aleatorio(tarifasP2);
+      const p3 = aleatorio(cierresP2);
+
+      if (Math.random() > 0.5) {
+        box.textContent = `${p1}\n\n${p2} ${p3}`;
+      } else {
+        box.textContent = `${p1}\n\n${p2}\n\n${p3}`;
+      }
+    }
+    status.textContent = "Nueva versión generada";
+  }
+
+  function copiar() {
+    const texto = document.getElementById('textoGenerado').textContent;
+    navigator.clipboard.writeText(texto).then(() => {
+      document.getElementById('statusMsg').textContent = "¡Copiado! Pégalo en TikTok";
     });
   }
+
+  // Inicializar
+  generar();
 </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-  </script>
+
 </body>
 </html>
