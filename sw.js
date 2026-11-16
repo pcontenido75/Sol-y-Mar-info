@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sol-y-mar-v4';
+const CACHE_NAME = 'sol-y-mar-v5';
 const urlsToCache = [
   './',
   './index.html',
