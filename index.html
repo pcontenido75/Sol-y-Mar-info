@@ -74,8 +74,8 @@
     .badge {
       display: inline-block;
       font-size: 0.74rem;
-      background: #ccfbf1;
-      color: #0f766e;
+      background: #fef3c7;
+      color: #92400e;
       padding: 4px 10px;
       border-radius: 20px;
       margin-bottom: 10px;
@@ -130,7 +130,7 @@
     <button class="tab" id="tab2" onclick="cambiarModo(2)">2. Precios/Info</button>
   </div>
 
-  <div id="badgeInfo" class="badge">Comentarios públicos: +2,500 variaciones sin palabras bloqueadas</div>
+  <div id="badgeInfo" class="badge">Comentarios públicos: +3,000 variaciones seguras</div>
 
   <div class="output-box" id="textoGenerado"></div>
 
@@ -144,31 +144,48 @@
 
 <script>
   let modoActual = 0;
-  let historial = JSON.parse(localStorage.getItem('solymar_historial_v4') || '[]');
+  let historial = JSON.parse(localStorage.getItem('solymar_historial_v5') || '[]');
 
-  // --- BLOQUES COMENTARIOS PÚBLICOS (+2,500 combinaciones seguras sin "DM", "link", "número") ---
+  // --- BLOQUES COMENTARIOS PÚBLICOS (+3,000 combinaciones naturales sin palabras bloqueadas) ---
+  // Todas invitan al cliente a escribir primero (evitando el bloqueo de mensajes privados)
   const comSaludos = [
     "¡Hola!", "¡Buenas!", "Hola, ¿qué tal?", "¡Saludos!", "Hola, gracias por comentar.",
-    "¡Qué gusto saludarte!", "Hola, por aquí te respondo.", "¡Hola! Qué bueno verte por acá.",
-    "Gracias por el interés.", "Hola, bienvenido.", "¡Buenas! Gracias por preguntar."
+    "¡Qué gusto saludarte!", "¡Hola! Qué bueno verte por acá.", "Gracias por el interés.",
+    "Hola, bienvenido.", "¡Buenas! Gracias por preguntar.", "¡Hola, cómo estás?",
+    "Saludos desde Chichiriviche.", "¡Hola! Qué alegría recibir tu mensaje."
   ];
-  const comCuerpos = [
-    "ya te dejé un mensaje por privado con los detalles",
-    "revísate tus mensajes que te escribí por allá",
-    "te mandé un saludito por mensaje directo para contarte",
-    "dime para qué fecha buscas y cuántos van para revisarte",
-    "cuéntame qué días tienes pensado venir a Chichiriviche",
-    "te respondí al privado para darte toda la información",
-    "pásate por nuestros mensajes o escríbenos por aquí mismo",
-    "avísame qué fecha te interesa y te paso la disponibilidad",
-    "en nuestro perfil tienes el contacto directo por si prefieres atención rápida",
-    "te dejé la información por privado para conversar mejor",
-    "dime cuántas personas serían y qué día buscan"
+
+  const comAccionPrivado = [
+    "escríbenos un mensaje al privado y te pasamos todos los detalles",
+    "mándanos un mensajito directo por acá para atenderte al momento",
+    "escríbenos por mensaje directo indicándonos qué fecha buscas",
+    "envíanos un mensaje al privado para darte toda la información",
+    "pásate por nuestro chat privado y con gusto te asesoramos",
+    "mándanos un mensaje directo para contarte sobre disponibilidad y detalles",
+    "escríbenos al privado con la fecha que tienes en mente",
+    "envíanos un mensajito por privado y te respondemos de inmediato",
+    "escríbenos por mensaje directo para ayudarte con tu reserva",
+    "mándanos un mensaje al privado y te damos atención personalizada",
+    "escríbenos al privado contándonos cuántas personas vienen",
+    "envíanos un mensaje directo para pasarte las opciones disponibles",
+    "escríbenos por privado y te enviamos todos los detalles al instante",
+    "mándanos un mensajito directo por acá para coordinar",
+    "escríbenos al privado y revisamos disponibilidad para tus días",
+    "también tienes el acceso directo en nuestro perfil si prefieres atención rápida"
   ];
+
   const comCierres = [
-    "de Sol y Mar.", "para tu estadía.", "con mucho gusto.", "cuando gustes.",
-    "en nuestros apartamentos.", "por allá te espero.", "para ayudarte.",
-    "sin compromiso.", "a dos cuadras del embarcadero.", ""
+    "para tu estadía en Sol y Mar.",
+    "sobre nuestros apartamentos a dos cuadras del embarcadero.",
+    "con mucho gusto.",
+    "¡Te esperamos por allá!",
+    "sin ningún compromiso.",
+    "para ayudarte a planificar tu viaje.",
+    "en nuestra posada.",
+    "¡Quedamos súper atentos!",
+    "para recibirlos en Chichiriviche.",
+    "cuando gustes.",
+    ""
   ];
 
   // --- BLOQUES PASO 1 (CHAT INICIO) ---
@@ -241,7 +258,7 @@
     
     const badge = document.getElementById('badgeInfo');
     if (modo === 0) {
-      badge.textContent = "Comentarios públicos: +2,500 variaciones seguras";
+      badge.textContent = "Comentarios públicos: +3,000 variaciones seguras";
       badge.style.background = "#fef3c7";
       badge.style.color = "#92400e";
     } else if (modo === 1) {
@@ -259,15 +276,25 @@
   function construirTexto() {
     if (modoActual === 0) {
       const sal = pick(comSaludos);
-      const cue = pick(comCuerpos);
+      const acc = pick(comAccionPrivado);
       const cie = pick(comCierres);
-      const cuerpoCap = cue.charAt(0).toUpperCase() + cue.slice(1);
+      const accCap = acc.charAt(0).toUpperCase() + acc.slice(1);
       
-      // Alterna si lleva saludo inicial o va directo al grano
-      if (Math.random() > 0.3) {
-        return `${sal} ${cuerpoCap}${cie ? ' ' + cie : '.'}`;
+      // Si el cierre empieza con exclamación, cerramos la oración anterior con punto
+      let textoFinal = "";
+      if (!cie) {
+        textoFinal = `${accCap}.`;
+      } else if (cie.startsWith("¡")) {
+        textoFinal = `${accCap}. ${cie}`;
       } else {
-        return `${cuerpoCap}${cie ? ' ' + cie : '.'}`;
+        textoFinal = `${accCap} ${cie}`;
+      }
+
+      // Alterna si lleva saludo inicial o va directo a la invitación
+      if (Math.random() > 0.25) {
+        return `${sal} ${textoFinal}`;
+      } else {
+        return textoFinal;
       }
     } else if (modoActual === 1) {
       if (Math.random() > 0.25) {
@@ -309,7 +336,7 @@
     const texto = document.getElementById('textoGenerado').textContent;
     historial.push(texto);
     if (historial.length > 500) historial.shift();
-    localStorage.setItem('solymar_historial_v4', JSON.stringify(historial));
+    localStorage.setItem('solymar_historial_v5', JSON.stringify(historial));
 
     navigator.clipboard.writeText(texto).then(() => {
       document.getElementById('statusMsg').textContent = `¡Copiado! (${historial.length} únicos en memoria)`;
@@ -317,6 +344,7 @@
     });
   }
 
+  document.getElementById('statusMsg').textContent = `Historial activo: ${historial.length} textos únicos`;
   generar();
 </script>
 
