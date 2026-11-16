@@ -127,7 +127,7 @@
   <div class="tabs">
     <button class="tab active" id="tab0" onclick="cambiarModo(0)">Comentarios</button>
     <button class="tab" id="tab1" onclick="cambiarModo(1)">1. Chat Inicio</button>
-    <button class="tab" id="tab2" onclick="cambiarModo(2)">2. Precios/Info</button>
+    <button class="tab" id="tab2" onclick="cambiarModo(2)">2. Precios/WA</button>
   </div>
 
   <div id="badgeInfo" class="badge">Comentarios públicos: +3,000 variaciones seguras</div>
@@ -144,10 +144,9 @@
 
 <script>
   let modoActual = 0;
-  let historial = JSON.parse(localStorage.getItem('solymar_historial_v5') || '[]');
+  let historial = JSON.parse(localStorage.getItem('solymar_historial_v6') || '[]');
 
   // --- BLOQUES COMENTARIOS PÚBLICOS (+3,000 combinaciones naturales sin palabras bloqueadas) ---
-  // Todas invitan al cliente a escribir primero (evitando el bloqueo de mensajes privados)
   const comSaludos = [
     "¡Hola!", "¡Buenas!", "Hola, ¿qué tal?", "¡Saludos!", "Hola, gracias por comentar.",
     "¡Qué gusto saludarte!", "¡Hola! Qué bueno verte por acá.", "Gracias por el interés.",
@@ -161,17 +160,16 @@
     "escríbenos por mensaje directo indicándonos qué fecha buscas",
     "envíanos un mensaje al privado para darte toda la información",
     "pásate por nuestro chat privado y con gusto te asesoramos",
-    "mándanos un mensaje directo para contarte sobre disponibilidad y detalles",
+    "mándanos un mensaje directo para contarte sobre nuestros apartamentos y tarifas",
     "escríbenos al privado con la fecha que tienes en mente",
     "envíanos un mensajito por privado y te respondemos de inmediato",
-    "escríbenos por mensaje directo para ayudarte con tu reserva",
+    "escríbenos por mensaje directo para darte la información completa",
     "mándanos un mensaje al privado y te damos atención personalizada",
     "escríbenos al privado contándonos cuántas personas vienen",
-    "envíanos un mensaje directo para pasarte las opciones disponibles",
-    "escríbenos por privado y te enviamos todos los detalles al instante",
-    "mándanos un mensajito directo por acá para coordinar",
-    "escríbenos al privado y revisamos disponibilidad para tus días",
-    "también tienes el acceso directo en nuestro perfil si prefieres atención rápida"
+    "envíanos un mensaje directo para pasarte los detalles del hospedaje",
+    "escríbenos por privado y te enviamos toda la información al instante",
+    "mándanos un mensajito directo por acá para orientarte",
+    "también tienes el acceso directo en nuestro perfil si prefieres atención rápida por mensajería"
   ];
 
   const comCierres = [
@@ -188,29 +186,27 @@
     ""
   ];
 
-  // --- BLOQUES PASO 1 (CHAT INICIO) ---
+  // --- BLOQUES PASO 1 (CHAT INICIO - Sin comprometer disponibilidad) ---
   const p1Saludos = [
     "¡Hola!", "¡Buenas!", "Hola, ¿cómo estás?", "¡Saludos!", "¡Hola! Qué gusto saludarte.",
     "Hola, gracias por escribirnos.", "¡Buenas! Gracias por contactarnos.", "Hola, ¿qué tal?"
   ];
-  const p1Confirmacion = [
-    "Sí tenemos disponibilidad en Sol y Mar.",
-    "Claro que sí, contamos con apartamentos disponibles cerca de los embarcaderos.",
-    "Con mucho gusto te ayudo con tu estadía en nuestros apartamentos.",
-    "Sí tenemos opciones disponibles para recibirlos.",
-    "Estamos a dos cuadras del embarcadero con todo listo para su estadía.",
-    "Con gusto te paso la información de Sol y Mar."
+  const p1Presentacion = [
+    "Con mucho gusto te ayudo con la información de Sol y Mar.",
+    "Claro que sí, te cuento cómo trabajamos en nuestros apartamentos.",
+    "Estamos ubicados a dos cuadras del embarcadero en Chichiriviche.",
+    "Con gusto te paso los detalles de nuestro hospedaje."
   ];
   const p1Preguntas = [
     "¿Para qué fechas estás planeando venir y cuántas personas serían?",
     "¿Qué días tienes pensado viajar y cuántos huéspedes van?",
     "Cuéntame para qué fecha buscas y cuántas personas serían.",
     "¿Para cuántas personas necesitas y en qué fecha vendrían?",
-    "¿Qué fecha te interesa consultar y cuántos van en el grupo?",
+    "¿Qué fecha te interesa y cuántos van en el grupo?",
     "Dime para cuántas personas sería el hospedaje y qué días tienen en mente."
   ];
 
-  // --- BLOQUES PASO 2 (PRECIOS E INFO) ---
+  // --- BLOQUES PASO 2 (PRECIOS E INFO + DERIVACIÓN DIRECTA A WHATSAPP / PERFIL) ---
   const p2Aperturas = [
     "¡Perfecto! Te cuento cómo trabajamos en Sol y Mar.",
     "Con mucho gusto te detallo lo que ofrecemos en nuestros apartamentos.",
@@ -238,12 +234,12 @@
     "Según la cantidad de personas el costo por noche es: 2 huéspedes en 45, 3 huéspedes en 60, 4 huéspedes en 80, 5 huéspedes en 100 y 6 huéspedes en 120.",
     "Nuestros precios por noche son: 45 (2 personas), 60 (3 personas), 80 (4 personas), 100 (5 personas) y 120 (6 personas)."
   ];
-  const p2Cierres = [
-    "Si te cuadra alguna de estas opciones, dime qué fecha buscas para revisarte disponibilidad.",
-    "Avísame para qué día te gustaría reservar y coordinamos los detalles por aquí mismo.",
-    "Dime qué fecha tienes en mente y te confirmo si tenemos el apartamento libre.",
-    "Cualquier duda me comentas por acá, o si prefieres atención directa puedes escribirnos al contacto de nuestro perfil.",
-    "Quedo atento a la fecha que buscas para verificar disponibilidad de inmediato."
+  const p2CierresWA = [
+    "Para verificar disponibilidad de fechas y concretar tu reserva, escríbenos directamente al contacto de nuestro perfil (WhatsApp) donde la administración te atiende al momento.",
+    "Todas las reservas y consultas de fechas disponibles se gestionan directamente por nuestro WhatsApp (tienes el acceso directo en el perfil) para confirmar tu estadía.",
+    "Si te cuadra alguna de estas opciones, dale al enlace de nuestro perfil para escribirnos directo al WhatsApp y revisar la disponibilidad exacta de tus fechas.",
+    "Para confirmar disponibilidad en calendario y apartar tus días, contáctanos directo al WhatsApp que aparece en nuestro perfil.",
+    "La disponibilidad de fechas y reservaciones las manejamos exclusivamente por nuestro WhatsApp. Puedes entrar directo desde el enlace de nuestro perfil para coordinar tu estadía."
   ];
 
   function pick(arr) {
@@ -262,11 +258,11 @@
       badge.style.background = "#fef3c7";
       badge.style.color = "#92400e";
     } else if (modo === 1) {
-      badge.textContent = "Paso 1 Chat: Abre conversación sin activar filtros";
+      badge.textContent = "Paso 1 Chat: Abre conversación sin comprometer fechas";
       badge.style.background = "#ccfbf1";
       badge.style.color = "#0f766e";
     } else {
-      badge.textContent = "Paso 2 Chat: Úsalo solo cuando el cliente responda";
+      badge.textContent = "Paso 2 Chat: Info completa + Deriva reservas a WhatsApp";
       badge.style.background = "#e0f2fe";
       badge.style.color = "#0369a1";
     }
@@ -280,7 +276,6 @@
       const cie = pick(comCierres);
       const accCap = acc.charAt(0).toUpperCase() + acc.slice(1);
       
-      // Si el cierre empieza con exclamación, cerramos la oración anterior con punto
       let textoFinal = "";
       if (!cie) {
         textoFinal = `${accCap}.`;
@@ -290,7 +285,6 @@
         textoFinal = `${accCap} ${cie}`;
       }
 
-      // Alterna si lleva saludo inicial o va directo a la invitación
       if (Math.random() > 0.25) {
         return `${sal} ${textoFinal}`;
       } else {
@@ -298,7 +292,7 @@
       }
     } else if (modoActual === 1) {
       if (Math.random() > 0.25) {
-        return `${pick(p1Saludos)} ${pick(p1Confirmacion)} ${pick(p1Preguntas)}`;
+        return `${pick(p1Saludos)} ${pick(p1Presentacion)} ${pick(p1Preguntas)}`;
       } else {
         return `${pick(p1Saludos)} ${pick(p1Preguntas)}`;
       }
@@ -307,13 +301,13 @@
       const ub = pick(p2Ubicacion);
       const com = pick(p2Comodidades);
       const tar = pick(p2Tarifas);
-      const cie = pick(p2Cierres);
+      const cie = pick(p2CierresWA);
 
       const molde = Math.random();
       if (molde < 0.35) {
         return `${ap} ${ub} ${com}\n\n${tar}\n\n${cie}`;
       } else if (molde < 0.70) {
-        return `${ap} ${com} ${ub}\n\n${tar} ${cie}`;
+        return `${ap} ${com} ${ub}\n\n${tar}\n\n${cie}`;
       } else {
         return `${ub} ${com}\n\n${tar}\n\n${cie}`;
       }
@@ -336,7 +330,7 @@
     const texto = document.getElementById('textoGenerado').textContent;
     historial.push(texto);
     if (historial.length > 500) historial.shift();
-    localStorage.setItem('solymar_historial_v5', JSON.stringify(historial));
+    localStorage.setItem('solymar_historial_v6', JSON.stringify(historial));
 
     navigator.clipboard.writeText(texto).then(() => {
       document.getElementById('statusMsg').textContent = `¡Copiado! (${historial.length} únicos en memoria)`;
